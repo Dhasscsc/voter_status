@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>வாக்காளர் அட்டை சரிபார்ப்பு - தாஸ் பொது சேவை மையம்</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #4a6fc1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .shop-name {
+            color: #1e3c72;
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .accreditation {
+            color: #d32f2f;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .tagline {
+            color: #2a5298;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .instructions {
+            background: linear-gradient(to right, #e3f2fd, #bbdefb);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            border-left: 5px solid #1e3c72;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .instructions h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .instructions p {
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #444;
+            font-size: 17px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 17px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+            outline: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 35px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons {
+            display: none;
+            gap: 15px;
+            margin-top: 25px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 200px;
+            padding: 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .check-btn {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: white;
+            box-shadow: 0 4px 10px rgba(30, 60, 114, 0.3);
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(30, 60, 114, 0.4);
+        }
+        
+        .exists-btn {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: white;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        }
+        
+        .exists-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .not-exists-btn {
+            background: linear-gradient(to right, #f44336, #d32f2f);
+            color: white;
+            box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+        }
+        
+        .not-exists-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(244, 67, 54, 0.4);
+        }
+        
+        .print-btn {
+            background: linear-gradient(to right, #2196F3, #1976D2);
+            color: white;
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        }
+        
+        .print-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .pdf-btn {
+            background: linear-gradient(to right, #FF9800, #F57C00);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+        }
+        
+        .pdf-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+        }
+        
+        .receipt {
+            display: none;
+            margin-top: 40px;
+            border: 2px solid #1e3c72;
+            padding: 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            position: relative;
+            width: 100%;
+        }
+        
+        .receipt-header {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .receipt-shop-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .receipt-accreditation {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .receipt-address {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 3px;
+        }
+        
+        .receipt-phone {
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        .receipt-body {
+            padding: 25px;
+        }
+        
+        .receipt-title {
+            text-align: center;
+            font-size: 20px;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .receipt-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: #2a5298;
+        }
+        
+        .receipt-details {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+            font-size: 14px;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .detail-label {
+            flex: 1;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .detail-value {
+            flex: 2;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .status-container {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .status-valid {
+            background: linear-gradient(to right, #d4edda, #c3e6cb);
+            border: 2px solid #155724;
+            color: #155724;
+        }
+        
+        .status-invalid {
+            background: linear-gradient(to right, #f8d7da, #f5c6cb);
+            border: 2px solid #721c24;
+            color: #721c24;
+        }
+        
+        .status-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .status-text {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .status-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .voter-details-form {
+            display: none;
+            background: #f0f7ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px solid #1e3c72;
+        }
+        
+        .voter-details-form h3 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-field {
+            margin-bottom: 15px;
+        }
+        
+        .form-field label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        
+        .form-field input, .form-field select {
+            padding: 12px;
+            font-size: 15px;
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #ddd;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .thank-you {
+            font-size: 16px;
+            color: #1e3c72;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .watermark {
+            position: absolute;
+            opacity: 0.05;
+            font-size: 100px;
+            font-weight: bold;
+            color: #1e3c72;
+            transform: rotate(-30deg);
+            top: 35%;
+            left: 15%;
+            pointer-events: none;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 15px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .warning-icon {
+            font-size: 32px;
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+        
+        .receipt-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .button-group, .action-buttons, .receipt-actions {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .shop-name {
+                font-size: 26px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media print {
+            .no-print, button {
+                display: none !important;
+            }
+            
+            body * {
+                visibility: hidden;
+            }
+            
+            #voterReceipt, #voterReceipt *,
+            #notFoundReceipt, #notFoundReceipt * {
+                visibility: visible;
+            }
+            
+            #voterReceipt, #notFoundReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+                page-break-inside: avoid;
+            }
+            
+            .receipt-header {
+                page-break-inside: avoid;
+            }
+            
+            .receipt-body {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="shop-name">தாஸ் பொது சேவை மையம்</div>
+            <div class="accreditation">(மத்திய மாநில அரசு அங்கீகாரம் பெற்றது)</div>
+            <div class="tagline">வாக்காளர் அட்டை சரிபார்ப்பு மையம்</div>
+        </div>
+        
+        <div class="instructions">
+            <h3>வழிமுறைகள்:</h3>
+            <p>1. வாக்காளர் அடையாள எண்ணை உள்ளிடவும்</p>
+            <p>2. "சரிபார்ப்பு செய்க" பொத்தான் கிளிக் செய்யவும்</p>
+            <p>3. வாக்காளர் பட்டியலில் இருந்தால் "இருக்கு", இல்லையெனில் "இல்லை" பொத்தானை கிளிக் செய்யவும்</p>
+            <p>4. "இருக்கு" எனில் வாக்காளர் விவரங்களை பதிவு செய்யவும்</p>
+            <p>5. பின்னர் அச்சிடவும் அல்லது PDF ஆக சேமிக்கவும்</p>
+            <p>6. சரிபார்ப்பு கட்டணம்: ₹10 (பத்து ரூபாய் மட்டும்)</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="voterId">வாக்காளர் அடையாள எண்:</label>
+            <input type="text" id="voterId" placeholder="வாக்காளர் எண்ணை உள்ளிடவும் (எ.கா: ABC1234567)" maxlength="20">
+        </div>
+        
+        <div class="button-group">
+            <button class="check-btn" onclick="checkVoterDetails()">
+                <span>🔍</span> சரிபார்ப்பு செய்க
+            </button>
+        </div>
+        
+        <div class="action-buttons" id="actionButtons">
+            <button class="exists-btn" onclick="voterExists()">
+                <span>✅</span> இருக்கு
+            </button>
+            <button class="not-exists-btn" onclick="voterNotExists()">
+                <span>❌</span> இல்லை
+            </button>
+        </div>
+        
+        <div class="voter-details-form" id="voterDetailsForm">
+            <h3>📝 வாக்காளர் விவரங்களை பதிவு செய்க</h3>
+            
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="voterName">வாக்காளர் பெயர் *</label>
+                    <input type="text" id="voterName" placeholder="முழு பெயரை உள்ளிடவும்">
+                </div>
+                
+                <div class="form-field">
+                    <label for="fatherHusbandName">தந்தை / கணவர் பெயர் *</label>
+                    <input type="text" id="fatherHusbandName" placeholder="தந்தை/கணவர் பெயர்">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="voterAge">வயது *</label>
+                    <input type="number" id="voterAge" placeholder="வயதை உள்ளிடவும்" min="18" max="120">
+                </div>
+                
+                <div class="form-field">
+                    <label for="voterGender">பாலினம் *</label>
+                    <select id="voterGender">
+                        <option value="">தேர்வு செய்க</option>
+                        <option value="ஆண்">ஆண்</option>
+                        <option value="பெண்">பெண்</option>
+                        <option value="மூன்றாம் பாலினம்">மூன்றாம் பாலினம்</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="constituencyNo">தொகுதி எண் *</label>
+                    <input type="text" id="constituencyNo" placeholder="தொகுதி எண்">
+                </div>
+                
+                <div class="form-field">
+                    <label for="constituencyName">தொகுதி பெயர் *</label>
+                    <input type="text" id="constituencyName" placeholder="தொகுதி பெயர்">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="partNo">பாகம் எண் *</label>
+                    <input type="text" id="partNo" placeholder="பாகம் எண்">
+                </div>
+                
+                <div class="form-field">
+                    <label for="serialNo">சீரியல் எண் *</label>
+                    <input type="text" id="serialNo" placeholder="சீரியல் எண்">
+                </div>
+            </div>
+            
+            <div class="form-field">
+                <label for="pollingStation">வாக்குப்பதிவு மையம் *</label>
+                <input type="text" id="pollingStation" placeholder="வாக்குப்பதிவு மையத்தின் பெயர்">
+            </div>
+            
+            <div class="form-field">
+                <label for="voterAddress">முகவரி *</label>
+                <input type="text" id="voterAddress" placeholder="முழு முகவரியை உள்ளிடவும்">
+            </div>
+            
+            <div class="button-group">
+                <button class="print-btn" onclick="generateVoterReceipt()">
+                    <span>🖨️</span> வாக்காளர் சான்றிதழ் உருவாக்கு
+                </button>
+            </div>
+        </div>
+        
+        <div class="note">
+            <strong>குறிப்பு:</strong> இந்த சரிபார்ப்பு ஒரு மாதிரி மட்டும். உண்மை சரிபார்ப்புக்கு தேர்தல் ஆணையத்தின் அதிகாரப்பூர்வ வலைத்தளங்களை பயன்படுத்தவும்.
+        </div>
+        
+        <!-- வாக்காளர் உள்ளதா என்பதற்கான இரசீது -->
+        <div id="voterReceipt" class="receipt">
+            <div class="watermark">தாஸ்</div>
+            
+            <div class="receipt-header">
+                <div class="receipt-shop-name">தாஸ் பொது சேவை மையம்</div>
+                <div class="receipt-accreditation">(மத்திய மாநில அரசு அங்கீகாரம் பெற்றது)</div>
+                <div class="receipt-address">147எ, கிரேட் காட்டன் ரோடு,</div>
+                <div class="receipt-address">மத்திய பாகம் காவல் நிலையம் எதிரில்,</div>
+                <div class="receipt-address">தூத்துக்குடி-628001</div>
+                <div class="receipt-phone">செல்: 98 43 23 23 24 / 88 70 23 23 32</div>
+            </div>
+            
+            <div class="receipt-body">
+                <div class="receipt-title">வாக்காளர் அட்டை சரிபார்ப்பு சான்றிதழ்</div>
+                
+                <div class="receipt-details">
+                    <div class="detail-row">
+                        <div class="detail-label">பரிவர்த்தனை எண்:</div>
+                        <div class="detail-value" id="txnId">SIR20240001</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">சரிபார்ப்பு தேதி:</div>
+                        <div class="detail-value" id="currentDate"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">நேரம்:</div>
+                        <div class="detail-value" id="currentTime"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">வாக்காளர் எண்:</div>
+                        <div class="detail-value" id="receiptVoterId"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">வாக்காளர் பெயர்:</div>
+                        <div class="detail-value" id="receiptVoterName"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">தந்தை / கணவர் பெயர்:</div>
+                        <div class="detail-value" id="receiptFatherHusbandName"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">வயது:</div>
+                        <div class="detail-value" id="receiptVoterAge"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">பாலினம்:</div>
+                        <div class="detail-value" id="receiptVoterGender"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">தொகுதி எண்:</div>
+                        <div class="detail-value" id="receiptConstituencyNo"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">தொகுதி பெயர்:</div>
+                        <div class="detail-value" id="receiptConstituencyName"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">பாகம் எண்:</div>
+                        <div class="detail-value" id="receiptPartNo"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">சீரியல் எண்:</div>
+                        <div class="detail-value" id="receiptSerialNo"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">வாக்குப்பதிவு மையம்:</div>
+                        <div class="detail-value" id="receiptPollingStation"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">முகவரி:</div>
+                        <div class="detail-value" id="receiptVoterAddress"></div>
+                    </div>
+                </div>
+                
+                <div id="statusDisplay" class="status-container status-valid">
+                    <div class="status-icon">✅</div>
+                    <div class="status-text">வாக்காளர் பட்டியலில் உள்ளது</div>
+                    <div class="status-message">இந்த வாக்காளர் SIR முறையில் சரிபார்க்கப்பட்டுள்ளார்</div>
+                </div>
+                
+                <div class="receipt-actions no-print">
+                    <button class="print-btn" onclick="printReceipt()">
+                        <span>🖨️</span> அச்சிடு
+                    </button>
+                    <button class="pdf-btn" onclick="saveVoterPDF()">
+                        <span>📄</span> PDF சேமிக்க
+                    </button>
+                </div>
+                
+                <div class="receipt-footer">
+                    <div class="thank-you">வாக்காளர் சேவைக்கு நன்றி!</div>
+                    <div>இந்த சான்றிதழ் கணினி மூலம் உருவாக்கப்பட்டது</div>
+                    <div>மேல்முறையீடு: 9843232324 / 8870232332</div>
+                    <div>வலைத்தளம்: www.https://dhasscsc.github.io/Online-Order/</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- வாக்காளர் இல்லாதபோதைய இரசீது -->
+        <div id="notFoundReceipt" class="receipt">
+            <div class="watermark">தாஸ்</div>
+            
+            <div class="receipt-header">
+                <div class="receipt-shop-name">தாஸ் பொது சேவை மையம்</div>
+                <div class="receipt-accreditation">(மத்திய மாநில அரசு அங்கீகாரம் பெற்றது)</div>
+                <div class="receipt-address">147எ, கிரேட் காட்டன் ரோடு,</div>
+                <div class="receipt-address">மத்திய பாகம் காவல் நிலையம் எதிரில்,</div>
+                <div class="receipt-address">தூத்துக்குடி-628001</div>
+                <div class="receipt-phone">செல்: 98 43 23 23 24 / 88 70 23 23 32</div>
+            </div>
+            
+            <div class="receipt-body">
+                <div class="receipt-title">வாக்காளர் பதிவு சரிபார்ப்பு அறிவித்தல்</div>
+                
+                <div class="warning-box">
+                    <div class="warning-icon">⚠️</div>
+                    <div class="status-text" style="color: #d32f2f;">வாக்காளர் பதிவு காணப்படவில்லை</div>
+                    <div class="status-message">உங்கள் வாக்காளர் பதிவு சரிபார்ப்பு பட்டியலில் இல்லை</div>
+                </div>
+                
+                <div class="receipt-details">
+                    <div class="detail-row">
+                        <div class="detail-label">பரிவர்த்தனை எண்:</div>
+                        <div class="detail-value" id="txnIdNotFound">SIR20240001</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">சரிபார்ப்பு தேதி:</div>
+                        <div class="detail-value" id="currentDateNotFound"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">நேரம்:</div>
+                        <div class="detail-value" id="currentTimeNotFound"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">வாக்காளர் எண்:</div>
+                        <div class="detail-value" id="receiptVoterIdNotFound"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">சரிபார்ப்பு முடிவு:</div>
+                        <div class="detail-value" style="color: #d32f2f; font-weight: bold;">வாக்காளர் பட்டியலில் இல்லை</div>
+                    </div>
+                </div>
+                
+                <div class="status-container" style="background: #fff3cd; border-color: #ffc107;">
+                    <div class="status-icon">📝</div>
+                    <div class="status-text" style="color: #856404;">அறிவுறுத்தல்</div>
+                    <div class="status-message" style="color: #856404;">
+                        உரிய ஆவணங்களுடன் புதிய வாக்காளர் அட்டை (படிவம் 6) விண்ணப்பிக்கவும்
+                    </div>
+                </div>
+                
+                <div class="receipt-details" style="margin-top: 25px;">
+                    <div class="detail-row">
+                        <div class="detail-label">தேவையான ஆவணங்கள்:</div>
+                        <div class="detail-value">
+                            1. ஆதார் அட்டை<br>
+                            2. பிறப்புச் சான்றிதழ்<br>
+                            3. முகவரி சான்று<br>
+                            4. புகைப்படங்கள் (2 பக்கங்கள்)<br>
+                            5. கையொப்பம் சான்றிதழ்
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">விண்ணப்பிக்க வேண்டிய இடம்:</div>
+                        <div class="detail-value">
+                            நேரில் எங்களின் சேவை மையம் <br>
+                            அல்லது<br>
+                            ஆன்லைனில் : https://dhasscsc.github.io/online_service/
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="receipt-actions no-print">
+                    <button class="print-btn" onclick="printNotFoundReceipt()">
+                        <span>🖨️</span> அச்சிடு
+                    </button>
+                    <button class="pdf-btn" onclick="saveNotFoundPDF()">
+                        <span>📄</span> PDF சேமிக்க
+                    </button>
+                </div>
+                
+                <div class="receipt-footer">
+                    <div class="thank-you">வாக்காளர் சேவைக்கு நன்றி!</div>
+                    <div>இந்த அறிவித்தல் கணினி மூலம் உருவாக்கப்பட்டது</div>
+                    <div>மேல்முறையீடு: 9843232324 / 8870232332</div>
+                    <div>வலைத்தளம்: www.https://dhasscsc.github.io/Online-Order/</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // மாறிகள்
+        let currentVoterId = "";
+        
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            
+            const date = now.toLocaleDateString('ta-IN', dateOptions);
+            const time = now.toLocaleTimeString('ta-IN', timeOptions);
+            
+            // வாக்காளர் இரசீது தேதி நேரம்
+            document.getElementById('currentDate').textContent = date;
+            document.getElementById('currentTime').textContent = time;
+            
+            // காணப்படாத இரசீது தேதி நேரம்
+            document.getElementById('currentDateNotFound').textContent = date;
+            document.getElementById('currentTimeNotFound').textContent = time;
+            
+            // பரிவர்த்தனை எண்
+            const txnId = 'SIR' + now.getFullYear() + 
+                         String(now.getMonth() + 1).padStart(2, '0') +
+                         String(now.getDate()).padStart(2, '0') +
+                         String(now.getHours()).padStart(2, '0') +
+                         String(now.getMinutes()).padStart(2, '0') +
+                         String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('txnId').textContent = txnId;
+            document.getElementById('txnIdNotFound').textContent = txnId;
+        }
+        
+        function checkVoterDetails() {
+            currentVoterId = document.getElementById('voterId').value.trim().toUpperCase();
+            
+            if (!currentVoterId) {
+                alert('தயவு செய்து வாக்காளர் அடையாள எண்ணை உள்ளிடவும்');
+                return;
+            }
+            
+            if (currentVoterId.length < 5) {
+                alert('சரியான வாக்காளர் எண்ணை உள்ளிடவும்');
+                return;
+            }
+            
+            // செயல்பாட்டு பொத்தான்களை காட்டு
+            document.getElementById('actionButtons').style.display = 'flex';
+            
+            // மேலே உருட்டு
+            document.getElementById('actionButtons').scrollIntoView({ behavior: 'smooth' });
+            
+            // தகவல் காட்டு
+            alert('வாக்காளர் எண்: ' + currentVoterId + '\n\nதயவு செய்து "இருக்கு" அல்லது "இல்லை" பொத்தானை தேர்வு செய்யவும்.');
+        }
+        
+        function voterExists() {
+            // வாக்காளர் விவர படிவத்தை காட்டு
+            document.getElementById('voterDetailsForm').style.display = 'block';
+            
+            // மறைக்க வேண்டியவை
+            document.getElementById('actionButtons').style.display = 'none';
+            
+            // படிவத்திற்கு மேலே உருட்டு
+            document.getElementById('voterDetailsForm').scrollIntoView({ behavior: 'smooth' });
+            
+            // படிவத்தை தூய்மையாக்கு
+            clearVoterForm();
+            
+            // தகவல்
+            alert('வாக்காளர் பட்டியலில் உள்ளது. தயவு செய்து வாக்காளர் விவரங்களை பதிவு செய்யவும்.');
+        }
+        
+        function voterNotExists() {
+            // மறைக்க வேண்டியவை
+            document.getElementById('actionButtons').style.display = 'none';
+            document.getElementById('voterDetailsForm').style.display = 'none';
+            
+            // காணப்படாத இரசீதை தயார் செய்
+            prepareNotFoundReceipt();
+            
+            // இரசீதை காட்டு
+            document.getElementById('notFoundReceipt').style.display = 'block';
+            document.getElementById('notFoundReceipt').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function clearVoterForm() {
+            document.getElementById('voterName').value = '';
+            document.getElementById('fatherHusbandName').value = '';
+            document.getElementById('voterAge').value = '';
+            document.getElementById('voterGender').value = '';
+            document.getElementById('constituencyNo').value = '';
+            document.getElementById('constituencyName').value = '';
+            document.getElementById('partNo').value = '';
+            document.getElementById('serialNo').value = '';
+            document.getElementById('pollingStation').value = '';
+            document.getElementById('voterAddress').value = '';
+        }
+        
+        function validateVoterForm() {
+            const requiredFields = [
+                'voterName', 'fatherHusbandName', 'voterAge', 'voterGender',
+                'constituencyNo', 'constituencyName', 'partNo', 'serialNo',
+                'pollingStation', 'voterAddress'
+            ];
+            
+            for (const fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    alert('தயவு செய்து அனைத்து தேவையான புலங்களையும் நிரப்பவும்');
+                    field.focus();
+                    return false;
+                }
+            }
+            
+            const age = parseInt(document.getElementById('voterAge').value);
+            if (age < 18 || age > 120) {
+                alert('சரியான வயதை உள்ளிடவும் (18-120)');
+                document.getElementById('voterAge').focus();
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function generateVoterReceipt() {
+            if (!validateVoterForm()) {
+                return;
+            }
+            
+            // இரசீதை தயார் செய்
+            prepareVoterReceipt();
+            
+            // இரசீதை காட்டு
+            document.getElementById('voterReceipt').style.display = 'block';
+            document.getElementById('voterDetailsForm').style.display = 'none';
+            
+            // மேலே உருட்டு
+            document.getElementById('voterReceipt').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function prepareVoterReceipt() {
+            // வாக்காளர் எண்
+            document.getElementById('receiptVoterId').textContent = currentVoterId;
+            
+            // படிவ தரவுகளை இரசீதில் பதியவும்
+            document.getElementById('receiptVoterName').textContent = document.getElementById('voterName').value;
+            document.getElementById('receiptFatherHusbandName').textContent = document.getElementById('fatherHusbandName').value;
+            document.getElementById('receiptVoterAge').textContent = document.getElementById('voterAge').value + " ஆண்டுகள்";
+            document.getElementById('receiptVoterGender').textContent = document.getElementById('voterGender').value;
+            document.getElementById('receiptConstituencyNo').textContent = document.getElementById('constituencyNo').value;
+            document.getElementById('receiptConstituencyName').textContent = document.getElementById('constituencyName').value;
+            document.getElementById('receiptPartNo').textContent = document.getElementById('partNo').value;
+            document.getElementById('receiptSerialNo').textContent = document.getElementById('serialNo').value;
+            document.getElementById('receiptPollingStation').textContent = document.getElementById('pollingStation').value;
+            document.getElementById('receiptVoterAddress').textContent = document.getElementById('voterAddress').value;
+            
+            // தேதி நேரம் புதுப்பிப்பு
+            updateDateTime();
+        }
+        
+        function prepareNotFoundReceipt() {
+            // வாக்காளர் எண்
+            document.getElementById('receiptVoterIdNotFound').textContent = currentVoterId;
+            
+            // தேதி நேரம் புதுப்பிப்பு
+            updateDateTime();
+        }
+        
+        function printReceipt() {
+            const receiptElement = document.getElementById('voterReceipt');
+            if (receiptElement.style.display === 'none') {
+                alert('முதலில் வாக்காளர் சான்றிதழை உருவாக்கவும்');
+                return;
+            }
+            
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+        
+        function printNotFoundReceipt() {
+            const receiptElement = document.getElementById('notFoundReceipt');
+            if (receiptElement.style.display === 'none') {
+                alert('முதலில் வாக்காளர் இல்லாத அறிவித்தலை உருவாக்கவும்');
+                return;
+            }
+            
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+        
+        function saveVoterPDF() {
+            const receiptElement = document.getElementById('voterReceipt');
+            if (receiptElement.style.display === 'none') {
+                alert('முதலில் வாக்காளர் சான்றிதழை உருவாக்கவும்');
+                return;
+            }
+            
+            const fileName = `SIR-VOTER-${currentVoterId}-${new Date().getTime()}.pdf`;
+            saveAsPDF(receiptElement, fileName);
+        }
+        
+        function saveNotFoundPDF() {
+            const receiptElement = document.getElementById('notFoundReceipt');
+            if (receiptElement.style.display === 'none') {
+                alert('முதலில் வாக்காளர் இல்லாத அறிவித்தலை உருவாக்கவும்');
+                return;
+            }
+            
+            const fileName = `SIR-NOT-FOUND-${currentVoterId}-${new Date().getTime()}.pdf`;
+            saveAsPDF(receiptElement, fileName);
+        }
+        
+        function saveAsPDF(element, fileName) {
+            // PDF ஐ உருவாக்கவும்
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a5');
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 148;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.save(fileName);
+                
+                alert('PDF வெற்றிகரமாக சேமிக்கப்பட்டது: ' + fileName);
+            }).catch(err => {
+                console.error('PDF உருவாக்கல் பிழை:', err);
+                alert('PDF உருவாக்கல் பிழை ஏற்பட்டது. தயவு செய்து மீண்டும் முயற்சி செய்யவும்.');
+            });
+        }
+        
+        window.onload = function() {
+            updateDateTime();
+            
+            document.getElementById('voterId').addEventListener('input', function(e) {
+                this.value = this.value.toUpperCase();
+            });
+            
+            document.getElementById('voterId').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkVoterDetails();
+                }
+            });
+            
+            // வயது புலத்திற்கு எண்கள் மட்டும்
+            document.getElementById('voterAge').addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, '');
+            });
+            
+            window.addEventListener('afterprint', function() {
+                // அச்சிட்ட பிறகு இரசீதை மறைக்க
+                document.getElementById('voterReceipt').style.display = 'none';
+                document.getElementById('notFoundReceipt').style.display = 'none';
+                
+                // மீண்டும் சரிபார்ப்புக்கு தயார்
+                document.getElementById('actionButtons').style.display = 'none';
+                document.getElementById('voterDetailsForm').style.display = 'none';
+                document.getElementById('voterId').value = '';
+                currentVoterId = "";
+            });
+        };
+    </script>
+</body>
+</html>
